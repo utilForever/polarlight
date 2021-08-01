@@ -1,7 +1,10 @@
 [package]
 name = "polarlight"
 version = "0.0.1"
-authors = [ "Chris Ohk <utilforever@gmail.com>" ]
+authors = [
+    "Chris Ohk <utilforever@gmail.com>",
+    "James Chee <litcoderr@gmail.com>"
+]
 edition = "2018"
 description = "A Machine Learning Framework for High Performance written in Rust"
 
