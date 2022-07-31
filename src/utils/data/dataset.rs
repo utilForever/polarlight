@@ -59,9 +59,7 @@ pub mod builtin {
             let raw = fs::read(&root)?;
             root.pop();
 
-            Ok(OnMemData {
-                raw
-            })
+            Ok(OnMemData { raw })
         }
     }
 
