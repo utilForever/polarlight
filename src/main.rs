@@ -1,5 +1,6 @@
 use polarlight::Tensor;
 
+#[rustfmt::skip]
 fn main() {
     println!("Hello, world!");
     let t = Tensor::build(vec![2, 2, 3],
