@@ -1,6 +1,8 @@
+use std::any::Any;
 use std::error;
-use std::io::Cursor;
+use std::io::{Cursor, Read};
 use std::path::PathBuf;
+use flate2::read::GzDecoder;
 
 pub mod dataset;
 
@@ -12,19 +14,32 @@ pub mod dataset;
 /// * `root` - Root directory of dataset
 /// * `file_name` - Name of file
 /// * `url` - Url where original data is stored
-fn download_from_url(root: &mut PathBuf, file_name: &str, url: &str) -> Result<(), Box<dyn error::Error>>
+fn download_from_url(root: &mut PathBuf, file_name: &str, url: &str, decompress: bool) -> Result<(), Box<dyn error::Error>>
 {
     // append file_name to root to construct file path
     root.push(file_name);
     if !root.exists() {
+        // get request
         let resp = reqwest::blocking::get(url)?;
+
         // create file
         let mut file = std::fs::File::create(&root)?;
-        // get response bytes
-        let byt = resp.bytes()?;
-        // write bytes to file
-        let mut content = Cursor::new(byt);
-        std::io::copy(&mut content, &mut file)?;
+
+        if decompress {
+            // Decompress response and store its bytes in buffer
+            let mut gz = GzDecoder::new(resp);
+            let mut buf: Vec<u8> = Vec::new();
+            gz.read_to_end(&mut buf);
+
+            // write bytes to file
+            let mut content = Cursor::new(buf);
+            std::io::copy(&mut content, &mut file)?;
+        } else {
+            // write bytes to file
+            let mut content = Cursor::new(resp.bytes()?);
+            std::io::copy(&mut content, &mut file)?;
+        }
+
     } else {
         panic!("Root directory [{:?}] does not exist", root);
     }

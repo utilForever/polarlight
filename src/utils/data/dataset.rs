@@ -37,7 +37,7 @@ pub mod builtin {
         /// Constructor
         fn new(mut root: PathBuf, file_name: &'static str, source: &'static str) -> Result<OnMemData, Box<dyn error::Error>> {
             // Download if file does not exist
-            download_from_url(&mut root, file_name, source)?;
+            download_from_url(&mut root, file_name, source, true)?;
 
             // load file to memory
             root.push(file_name);
