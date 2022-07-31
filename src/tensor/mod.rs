@@ -1,4 +1,4 @@
-#[allow(dead_code)]
+#![allow(dead_code)]
 use crate::traits;
 
 //generalized tensor
@@ -24,7 +24,7 @@ impl<T: traits::TensorTrait<T>> Tensor<T> {
         }
     }
     pub fn get(&self, index: Vec<i32>) -> T {
-        let mut index = index;
+        //let mut index = index;
         let mut i: i32 = 0;
         for x in 0..self.dim() {
             let mut tmp = 1;
@@ -85,7 +85,6 @@ impl<T: traits::TensorTrait<T>> Tensor<T> {
         for i in 0..self.components.len() {
             let mut tmp1 = self.components[i as usize].clone();
             let mut tmp2 = other.components[i as usize].clone();
-            // println!("{}", tmp1 / tmp2);
             vec.push(tmp1 / tmp2);
         }
         Tensor::build(self.shape.clone(), vec)
@@ -100,8 +99,8 @@ impl<T: traits::TensorTrait<T>> Tensor<T> {
         }
         let mut vec = Vec::new();
         for i in 0..self.components.len() {
-            let mut tmp1 = self.components[i as usize].clone();
-            let mut tmp2 = other.components[i as usize].clone();
+            let tmp1 = self.components[i as usize].clone();
+            let tmp2 = other.components[i as usize].clone();
             vec.push(tmp1 * tmp2);
         }
         Tensor::build(self.shape.clone(), vec)
