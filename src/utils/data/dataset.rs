@@ -58,11 +58,12 @@ pub mod builtin {
     /// # Parameters
     /// * `root` - Root directory of dataset
     pub struct MNIST {
+        test: bool,
         root: PathBuf,
-        train_img: OnMemData,
-        train_label: OnMemData,
-        test_img: OnMemData,
-        test_label: OnMemData
+        train_img: Option<OnMemData>,
+        train_label: Option<OnMemData>,
+        test_img: Option<OnMemData>,
+        test_label: Option<OnMemData>
     }
     impl MNIST {
         /// Constructor of MNIST dataset
@@ -70,21 +71,24 @@ pub mod builtin {
         /// # Parameters
         /// * `root` - Root directory of dataset
         /// * `train` - If True, downloads training set, otherwise downloads test set
-        fn new(mut root: PathBuf) -> Result<MNIST, io::Error> {
+        fn new(mut root: PathBuf, test: bool) -> Result<MNIST, io::Error> {
             // validate root
             // create one if one does not exist
             if let Ok(_) = std::fs::create_dir_all(root.as_path()) {}
 
-            let mut train_img = OnMemData::new(root.clone(), "mnist_train_img",
-                                           "http://yann.lecun.com/exdb/mnist/train-images-idx3-ubyte.gz")?;
-            let train_label = OnMemData::new(root.clone(), "mnist_train_label",
-                                             "http://yann.lecun.com/exdb/mnist/train-labels-idx1-ubyte.gz")?;
-            let test_img = OnMemData::new(root.clone(), "mnist_test_img",
-                                         "http://yann.lecun.com/exdb/mnist/t10k-images-idx3-ubyte.gz")?;
-            let test_label = OnMemData::new(root.clone(), "mnist_test_label",
-                                           "http://yann.lecun.com/exdb/mnist/t10k-labels-idx1-ubyte.gz")?;
-
-            Ok(MNIST { root, train_img, train_label, test_img, test_label })
+            if test {
+                let test_img = Some(OnMemData::new(root.clone(), "mnist_test_img",
+                                              "http://yann.lecun.com/exdb/mnist/t10k-images-idx3-ubyte.gz")?);
+                let test_label = Some(OnMemData::new(root.clone(), "mnist_test_label",
+                                                "http://yann.lecun.com/exdb/mnist/t10k-labels-idx1-ubyte.gz")?);
+                Ok(MNIST { test, root, train_img: None, train_label: None, test_img, test_label })
+            } else {
+                let train_img = Some(OnMemData::new(root.clone(), "mnist_train_img",
+                                                   "http://yann.lecun.com/exdb/mnist/train-images-idx3-ubyte.gz")?);
+                let train_label = Some(OnMemData::new(root.clone(), "mnist_train_label",
+                                                 "http://yann.lecun.com/exdb/mnist/train-labels-idx1-ubyte.gz")?);
+                Ok(MNIST { test, root, train_img, train_label, test_img: None, test_label: None })
+            }
         }
     }
     impl Dataset for MNIST {
@@ -105,7 +109,7 @@ pub mod builtin {
 
         #[test]
         fn generate_mnist_dataset() {
-            if let Ok(mnist_train) = MNIST::new(PathBuf::from("raw")) {
+            if let Ok(mnist_train) = MNIST::new(PathBuf::from("raw"), true) {
                 // TODO test mnist dataset
             }
         }

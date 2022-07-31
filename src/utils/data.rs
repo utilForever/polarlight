@@ -13,7 +13,9 @@ pub mod dataset;
 /// * `url` - Url where original data is stored
 fn download_from_url(root: &mut PathBuf, file_name: &str, url: &str) {
     // append file_name to root to construct file path
+    // TODO check hash
     root.push(file_name);
+    // TODO throw error
     if !root.exists() {
         if let Ok(resp) = reqwest::blocking::get(url) {
             if let Some(file_path_str) = root.to_str() {
