@@ -1,6 +1,5 @@
 use polarlight::Tensor;
 
-
 fn main() {
     println!("Hello, world!");
     let t = Tensor::build(vec![2, 2, 3],
@@ -9,25 +8,25 @@ fn main() {
                               4, 5, 6,
 
                               7, 8, 9,
-                              10, 11, 12,
+                              10, 11, 12
                           ]);
 
     let tmp1 = Tensor::build(vec![2, 3],
                              vec![
                                  1.0, 2.0, 3.0,
-                                 4.0, 5.0, 6.0,
+                                 4.0, 5.0, 6.0
                              ]);
     let tmp2 = Tensor::build(vec![2, 3],
-                                vec![
-                                    7.0, 8.0, 9.0,
-                                    10.0, 11.0, 12.0,
-                                ]);
+                             vec![
+                                 7.0, 8.0, 9.0,
+                                 10.0, 11.0, 12.0
+                             ]);
     let tmpmul = Tensor::build(vec![3, 4],
-                                vec![
-                                    1.0, 2.0, 3.0, 4.0,
-                                    5.0, 6.0, 7.0, 8.0,
-                                    9.0, 10.0, 11.0, 12.0,
-                                ]);
+                               vec![
+                                   1.0, 2.0, 3.0, 4.0,
+                                   5.0, 6.0, 7.0, 8.0,
+                                   9.0, 10.0, 11.0, 12.0
+                               ]);
 
     let tmp3 = tmp1.add(&tmp2);
     let tmp4 = tmp1.sub(&tmp2);

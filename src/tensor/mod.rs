@@ -1,7 +1,6 @@
 #[allow(dead_code)]
 use crate::traits;
 
-
 //generalized tensor
 pub struct Tensor<T: traits::TensorTrait<T>> {
     shape: Vec<i32>,
@@ -44,8 +43,8 @@ impl<T: traits::TensorTrait<T>> Tensor<T> {
     }
 
     pub fn add(&self, other: &Tensor<T>) -> Tensor<T>
-        where
-            T: std::ops::Add<Output=T>,
+    where
+        T: std::ops::Add<Output = T>,
     {
         if self.dim() != other.dim() {
             panic!("The dimension of two tensors are not equal");
@@ -60,8 +59,8 @@ impl<T: traits::TensorTrait<T>> Tensor<T> {
     }
 
     pub fn sub(&self, other: &Tensor<T>) -> Tensor<T>
-        where
-            T: std::ops::Sub<Output=T>,
+    where
+        T: std::ops::Sub<Output = T>,
     {
         if self.dim() != other.dim() {
             panic!("The dimension of two tensors are not equal");
@@ -76,8 +75,8 @@ impl<T: traits::TensorTrait<T>> Tensor<T> {
     }
 
     pub fn div(&self, other: &Tensor<T>) -> Tensor<T>
-        where
-            T: std::ops::Div<Output=T>,
+    where
+        T: std::ops::Div<Output = T>,
     {
         if self.dim() != other.dim() {
             panic!("The dimension of two tensors are not equal");
@@ -93,8 +92,8 @@ impl<T: traits::TensorTrait<T>> Tensor<T> {
     }
 
     pub fn mul(&self, other: &Tensor<T>) -> Tensor<T>
-        where
-            T: std::ops::Mul<Output=T>,
+    where
+        T: std::ops::Mul<Output = T>,
     {
         if self.dim() != other.dim() {
             panic!("The dimension of two tensors are not equal");
@@ -109,24 +108,31 @@ impl<T: traits::TensorTrait<T>> Tensor<T> {
     }
 
     pub fn matmul(&self, other: &Tensor<T>) -> Tensor<T>
-        where
-            T: std::ops::Mul<Output=T>,
+    where
+        T: std::ops::Mul<Output = T>,
     {
         // TODO : 3d, 4d matmul
         if self.dim() != other.dim() {
             panic!("The dimension of two tensors are not equal");
         }
 
-        if self.dim() == 2 { self.matmul2d(other) } else { panic!("Not implemented"); }
+        if self.dim() == 2 {
+            self.matmul2d(other)
+        } else {
+            panic!("Not implemented");
+        }
     }
 
     fn matmul2d(&self, other: &Tensor<T>) -> Tensor<T>
-        where
-            T: std::ops::Mul<Output=T>,
-            T: std::ops::Add<Output=T>,
+    where
+        T: std::ops::Mul<Output = T>,
+        T: std::ops::Add<Output = T>,
     {
         if self.shape[1] != other.shape[0] {
-            panic!("{:?} @ {:?} The dimension of two tensors are not equal", self.shape, other.shape);
+            panic!(
+                "{:?} @ {:?} The dimension of two tensors are not equal",
+                self.shape, other.shape
+            );
         }
         let new_shape = vec![self.shape[0], other.shape[1]];
         let mut vec = Vec::new();
@@ -143,9 +149,9 @@ impl<T: traits::TensorTrait<T>> Tensor<T> {
     }
 
     fn matmul3d(&self, other: &Tensor<T>) -> Tensor<T>
-        where
-            T: std::ops::Mul<Output=T>,
-            T: std::ops::Add<Output=T>,
+    where
+        T: std::ops::Mul<Output = T>,
+        T: std::ops::Add<Output = T>,
     {
         // TODO : Not Implemented
         panic!("Not implemented");
@@ -189,9 +195,17 @@ impl<T: traits::TensorTrait<T>> Tensor<T> {
             for i in 0..self.shape[0] {
                 print!("[");
                 for j in 0..self.shape[1] {
-                    if j == self.shape[1] - 1 { print!("{}", self.get(vec![i, j])); } else { print!("{}, ", self.get(vec![i, j])); }
+                    if j == self.shape[1] - 1 {
+                        print!("{}", self.get(vec![i, j]));
+                    } else {
+                        print!("{}, ", self.get(vec![i, j]));
+                    }
                 }
-                if i == self.shape[0] - 1 { print!("]"); } else { println!("], "); }
+                if i == self.shape[0] - 1 {
+                    print!("]");
+                } else {
+                    println!("], ");
+                }
             }
             print!("]");
         } else if self.dim() == 3 {
@@ -201,11 +215,23 @@ impl<T: traits::TensorTrait<T>> Tensor<T> {
                 for j in 0..self.shape[1] {
                     print!("[");
                     for k in 0..self.shape[2] {
-                        if k == self.shape[2] - 1 { print!("{}", self.get(vec![i, j, k])); } else { print!("{}, ", self.get(vec![i, j, k])); }
+                        if k == self.shape[2] - 1 {
+                            print!("{}", self.get(vec![i, j, k]));
+                        } else {
+                            print!("{}, ", self.get(vec![i, j, k]));
+                        }
                     }
-                    if j == self.shape[1] - 1 { print!("]"); } else { println!("], "); }
+                    if j == self.shape[1] - 1 {
+                        print!("]");
+                    } else {
+                        println!("], ");
+                    }
                 }
-                if i == self.shape[0] - 1 { print!("]"); } else { println!("], "); }
+                if i == self.shape[0] - 1 {
+                    print!("]");
+                } else {
+                    println!("], ");
+                }
             }
             print!("]");
         } else if self.dim() == 4 {
@@ -217,13 +243,29 @@ impl<T: traits::TensorTrait<T>> Tensor<T> {
                     for k in 0..self.shape[2] {
                         print!("[");
                         for l in 0..self.shape[3] {
-                            if l == self.shape[3] - 1 { print!("{}", self.get(vec![i, j, k, l])); } else { print!("{}, ", self.get(vec![i, j, k, l])); }
+                            if l == self.shape[3] - 1 {
+                                print!("{}", self.get(vec![i, j, k, l]));
+                            } else {
+                                print!("{}, ", self.get(vec![i, j, k, l]));
+                            }
                         }
-                        if k == self.shape[2] - 1 { print!("]"); } else { println!("], "); }
+                        if k == self.shape[2] - 1 {
+                            print!("]");
+                        } else {
+                            println!("], ");
+                        }
                     }
-                    if j == self.shape[1] - 1 { print!("]"); } else { println!("], "); }
+                    if j == self.shape[1] - 1 {
+                        print!("]");
+                    } else {
+                        println!("], ");
+                    }
                 }
-                if i == self.shape[0] - 1 { print!("]"); } else { println!("], "); }
+                if i == self.shape[0] - 1 {
+                    print!("]");
+                } else {
+                    println!("], ");
+                }
             }
             print!("]");
         }
