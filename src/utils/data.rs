@@ -18,6 +18,7 @@ fn download_from_url(root: &mut PathBuf, file_name: &str, url: &str, decompress:
 {
     // append file_name to root to construct file path
     root.push(file_name);
+    // download only when file does not exist
     if !root.exists() {
         // get request
         let resp = reqwest::blocking::get(url)?;
@@ -40,8 +41,6 @@ fn download_from_url(root: &mut PathBuf, file_name: &str, url: &str, decompress:
             std::io::copy(&mut content, &mut file)?;
         }
 
-    } else {
-        panic!("Root directory [{:?}] does not exist", root);
     }
     // convert back to original data root path
     root.pop();

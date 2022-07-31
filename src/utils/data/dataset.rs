@@ -4,7 +4,7 @@ pub trait Dataset {
     ///
     /// # Arguments
     /// * `self` - A reference to itself
-    fn len(&self) -> i32;
+    fn len(&self) -> u32;
 
     /// Returns the datum corresponding to the index
     ///
@@ -92,8 +92,30 @@ pub mod builtin {
         }
     }
     impl Dataset for MNIST {
-        fn len(&self) -> i32 {
-            todo!()
+        fn len(&self) -> u32 {
+            let mut label: Option<&OnMemData> = None;
+            if self.test {
+                if let Some(label_) = &self.test_label {
+                    label = Some(label_);
+                }
+            }else {
+                if let Some(label_) = &self.train_label {
+                    label = Some(label_);
+                }
+            }
+
+            // big endian
+            // extract number of labels
+            if let Some(label_data) = label {
+                let mut length: u32 = 0;
+                for i in 0..4 {
+                    let tmp = label_data.raw[4 + i];
+                    length += (tmp as u32) << (24 - 8 * i);
+                }
+                length
+            } else {
+                0
+            }
         }
 
         fn get_item<T>(&self, idx: i32) -> T {
@@ -105,12 +127,14 @@ pub mod builtin {
     #[cfg(test)]
     mod tests{
         use std::path::PathBuf;
+        use crate::utils::data::dataset::Dataset;
         use super::{MNIST};
 
         #[test]
         fn generate_mnist_dataset() {
-            if let Ok(mnist_train) = MNIST::new(PathBuf::from("raw"), true) {
-                // TODO test mnist dataset
+            if let Ok(mnist_test) = MNIST::new(PathBuf::from("raw"), true) {
+                let dataset_length = mnist_test.len();
+                print!("length: {}", dataset_length);
             }
         }
     }
