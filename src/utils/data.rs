@@ -1,21 +1,23 @@
-use std::any::Any;
+use flate2::read::GzDecoder;
 use std::error;
 use std::io::{Cursor, Read};
 use std::path::PathBuf;
-use flate2::read::GzDecoder;
 
 pub mod dataset;
-
 
 /// Downloads file from url to designated root path.
 /// Downloading process will only be proceeded when file path does not exist
 ///
-/// # Parameters
+/// # Arguments
 /// * `root` - Root directory of dataset
 /// * `file_name` - Name of file
 /// * `url` - Url where original data is stored
-fn download_from_url(root: &mut PathBuf, file_name: &str, url: &str, decompress: bool) -> Result<(), Box<dyn error::Error>>
-{
+pub fn download_from_url(
+    root: &mut PathBuf,
+    file_name: &str,
+    url: &str,
+    decompress: bool,
+) -> Result<(), Box<dyn error::Error>> {
     // append file_name to root to construct file path
     root.push(file_name);
     // download only when file does not exist
@@ -30,7 +32,7 @@ fn download_from_url(root: &mut PathBuf, file_name: &str, url: &str, decompress:
             // Decompress response and store its bytes in buffer
             let mut gz = GzDecoder::new(resp);
             let mut buf: Vec<u8> = Vec::new();
-            gz.read_to_end(&mut buf);
+            gz.read_to_end(&mut buf)?;
 
             // write bytes to file
             let mut content = Cursor::new(buf);
@@ -40,7 +42,6 @@ fn download_from_url(root: &mut PathBuf, file_name: &str, url: &str, decompress:
             let mut content = Cursor::new(resp.bytes()?);
             std::io::copy(&mut content, &mut file)?;
         }
-
     }
     // convert back to original data root path
     root.pop();
@@ -49,11 +50,11 @@ fn download_from_url(root: &mut PathBuf, file_name: &str, url: &str, decompress:
 
 /// Convert byte array to u32
 ///
-/// # Parameters
+/// # Arguments
 /// * `byt` : byte array
 /// * `offset` : offset of byte array to convert
 /// * `big_endian` : Boolean for if data is stored as big_endian
-fn bytearr_to_u32(byt: &Vec<u8>, offset: u32, big_endian: bool) -> u32{
+fn byte_arr_to_u32(byt: &Vec<u8>, offset: u32, big_endian: bool) -> u32 {
     let mut val: u32 = 0;
     for i in 0..4 {
         let tmp = byt[(offset + i) as usize];
