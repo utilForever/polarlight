@@ -46,3 +46,22 @@ fn download_from_url(root: &mut PathBuf, file_name: &str, url: &str, decompress:
     root.pop();
     Ok(())
 }
+
+/// Convert byte array to u32
+///
+/// # Parameters
+/// * `byt` : byte array
+/// * `offset` : offset of byte array to convert
+/// * `big_endian` : Boolean for if data is stored as big_endian
+fn bytearr_to_u32(byt: &Vec<u8>, offset: u32, big_endian: bool) -> u32{
+    let mut val: u32 = 0;
+    for i in 0..4 {
+        let tmp = byt[(offset + i) as usize];
+        if big_endian {
+            val += (tmp as u32) << (24 - 8 * i);
+        } else {
+            val += (tmp as u32) << (8 * i);
+        }
+    }
+    val
+}
