@@ -16,9 +16,9 @@ pub trait Dataset {
 
 /// Consists of builtin datasets (MNIST etc.)
 pub mod builtin {
-    use std::{fs, io};
+    use std::{error, fs};
     use super::Dataset;
-    use std::path::{Path, PathBuf};
+    use std::path::{PathBuf};
     use crate::utils::data::download_from_url;
 
     /// On Memory Data struct
@@ -35,9 +35,9 @@ pub mod builtin {
     }
     impl OnMemData {
         /// Constructor
-        fn new(mut root: PathBuf, file_name: &'static str, source: &'static str) -> Result<OnMemData, io::Error> {
+        fn new(mut root: PathBuf, file_name: &'static str, source: &'static str) -> Result<OnMemData, Box<dyn error::Error>> {
             // Download if file does not exist
-            download_from_url(&mut root, file_name, source);
+            download_from_url(&mut root, file_name, source)?;
 
             // load file to memory
             root.push(file_name);
@@ -71,7 +71,7 @@ pub mod builtin {
         /// # Parameters
         /// * `root` - Root directory of dataset
         /// * `train` - If True, downloads training set, otherwise downloads test set
-        fn new(mut root: PathBuf, test: bool) -> Result<MNIST, io::Error> {
+        fn new(mut root: PathBuf, test: bool) -> Result<MNIST, Box<dyn error::Error>> {
             // validate root
             // create one if one does not exist
             if let Ok(_) = std::fs::create_dir_all(root.as_path()) {}

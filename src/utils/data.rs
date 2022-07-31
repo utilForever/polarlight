@@ -1,3 +1,4 @@
+use std::error;
 use std::io::Cursor;
 use std::path::PathBuf;
 
@@ -11,26 +12,23 @@ pub mod dataset;
 /// * `root` - Root directory of dataset
 /// * `file_name` - Name of file
 /// * `url` - Url where original data is stored
-fn download_from_url(root: &mut PathBuf, file_name: &str, url: &str) {
+fn download_from_url(root: &mut PathBuf, file_name: &str, url: &str) -> Result<(), Box<dyn error::Error>>
+{
     // append file_name to root to construct file path
-    // TODO check hash
     root.push(file_name);
-    // TODO throw error
     if !root.exists() {
-        if let Ok(resp) = reqwest::blocking::get(url) {
-            if let Some(file_path_str) = root.to_str() {
-                // create file
-                if let Ok(mut file) = std::fs::File::create(String::from(file_path_str)) {
-                    // get response bytes
-                    if let Ok(byt) = resp.bytes() {
-                        // write bytes to file
-                        let mut content = Cursor::new(byt);
-                        if let Ok(_) = std::io::copy(&mut content, &mut file) {}
-                    }
-                }
-            }
-        }
+        let resp = reqwest::blocking::get(url)?;
+        // create file
+        let mut file = std::fs::File::create(&root)?;
+        // get response bytes
+        let byt = resp.bytes()?;
+        // write bytes to file
+        let mut content = Cursor::new(byt);
+        std::io::copy(&mut content, &mut file)?;
+    } else {
+        panic!("Root directory [{:?}] does not exist", root);
     }
     // convert back to original data root path
     root.pop();
+    Ok(())
 }
