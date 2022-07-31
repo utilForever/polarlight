@@ -1,4 +1,3 @@
-use core::panicking::panic;
 #[allow(dead_code)]
 use crate::traits;
 
