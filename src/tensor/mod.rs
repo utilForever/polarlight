@@ -1,5 +1,6 @@
 #![allow(dead_code)]
-use crate::traits;
+
+pub mod traits;
 
 //generalized tensor
 pub struct Tensor<T: traits::TensorTrait<T>> {
