@@ -170,15 +170,10 @@ impl<T: traits::TensorTrait<T>> Tensor<T> {
     }
 
     pub fn reshape(&self, shape: Vec<i32>) -> Tensor<T> {
-        // TODO
-        panic!("Not implemented");
-        let mut vec = Vec::new();
-        for i in 0..shape[0] {
-            for j in 0..shape[1] {
-                vec.push(self.get(vec![i, j]));
-            }
-        }
-        Tensor::build(shape, vec)
+        Tensor::build(shape, self.components.clone())
+
+        // TODO : reshape when one dimension is -1
+        // e.g. [1, 2, 3, 4] -> [1, -1]
     }
 
     pub fn print(&self) {
