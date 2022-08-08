@@ -9,9 +9,9 @@ pub mod dataset;
 /// Download process will be proceeded when the file path does not exist.
 ///
 /// # Arguments
-/// * `root` - Root directory of dataset
-/// * `file_name` - Name of file
-/// * `url` - Url where original data is stored
+/// * `root` - The root directory of dataset
+/// * `file_name` - The file name to download
+/// * `url` - URL where the original data is stored
 pub fn download_from_url(
     root: &mut PathBuf,
     file_name: &str,
