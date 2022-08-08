@@ -6,7 +6,7 @@ use std::path::PathBuf;
 pub mod dataset;
 
 /// Downloads file from url to designated root path.
-/// Downloading process will only be proceeded when file path does not exist
+/// Download process will be proceeded when the file path does not exist.
 ///
 /// # Arguments
 /// * `root` - Root directory of dataset
