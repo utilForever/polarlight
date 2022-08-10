@@ -12,39 +12,34 @@ pub mod dataset;
 /// * `root` - The root directory of dataset
 /// * `file_name` - The file name to download
 /// * `url` - URL where the original data is stored
+/// * `is_decompress` - true: decompress the downloaded file, false: does not decompress the downloaded file
 pub fn download_from_url(
     root: &mut PathBuf,
     file_name: &str,
     url: &str,
     is_decompress: bool,
 ) -> Result<(), Box<dyn error::Error>> {
-    // append file_name to root to construct file path
-    root.push(file_name);
-    // download only when file does not exist
-    if !root.exists() {
-        // get request
-        let resp = reqwest::blocking::get(url)?;
+    let mut file_path = root.clone();
+    file_path.push(file_name);
 
-        // create file
-        let mut file = std::fs::File::create(&root)?;
+    if !file_path.exists() {
+        let response = reqwest::blocking::get(url)?;
+        let mut file = std::fs::File::create(&file_path)?;
+        let mut cursor: Box<dyn Read>;
 
         if is_decompress {
-            // Decompress response and store its bytes in buffer
-            let mut gz = GzDecoder::new(resp);
+            let mut gz = GzDecoder::new(response);
             let mut buf: Vec<u8> = Vec::new();
             gz.read_to_end(&mut buf)?;
-
-            // write bytes to file
-            let mut content = Cursor::new(buf);
-            std::io::copy(&mut content, &mut file)?;
+            cursor = Box::new(Cursor::new(buf));
         } else {
-            // write bytes to file
-            let mut content = Cursor::new(resp.bytes()?);
-            std::io::copy(&mut content, &mut file)?;
+            let bytes = response.bytes()?;
+            cursor = Box::new(Cursor::new(bytes));
         }
+
+        std::io::copy(&mut cursor, &mut file)?;
     }
-    // convert back to original data root path
-    root.pop();
+
     Ok(())
 }
 
