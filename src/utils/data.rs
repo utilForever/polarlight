@@ -16,7 +16,7 @@ pub fn download_from_url(
     root: &mut PathBuf,
     file_name: &str,
     url: &str,
-    decompress: bool,
+    is_decompress: bool,
 ) -> Result<(), Box<dyn error::Error>> {
     // append file_name to root to construct file path
     root.push(file_name);
@@ -28,7 +28,7 @@ pub fn download_from_url(
         // create file
         let mut file = std::fs::File::create(&root)?;
 
-        if decompress {
+        if is_decompress {
             // Decompress response and store its bytes in buffer
             let mut gz = GzDecoder::new(resp);
             let mut buf: Vec<u8> = Vec::new();
