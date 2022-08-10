@@ -32,20 +32,18 @@ pub mod builtin {
     /// On Memory Data struct
     ///
     /// # Parameters
-    /// * `root` - Root directory
-    /// * `file_name` - name of downloaded file
-    /// * `source` - file online source
     /// * `raw` - raw data on memory
     struct OnMemData {
         raw: Vec<u8>,
     }
+
     impl OnMemData {
         /// Constructor
         ///
         /// # Arguments
-        /// * `root` - Root directory
-        /// * `file_name` - name of downloaded file
-        /// * `source` - file online source
+        /// * `root` - The root directory
+        /// * `file_name` - The downloaded file's name
+        /// * `source` - The source URL to download
         fn new(
             mut root: PathBuf,
             file_name: &'static str,
@@ -54,7 +52,7 @@ pub mod builtin {
             // Download if file does not exist
             download_from_url(&mut root, file_name, source, true)?;
 
-            // load file to memory
+            // Load file to memory
             root.push(file_name);
             let raw = fs::read(&root)?;
             root.pop();
@@ -69,13 +67,14 @@ pub mod builtin {
     /// * `image` - image vector
     /// * `label` - label (ranging from 0 to 9)
     /// * `row` - row size
-    /// * `col` - col size
     pub struct MnistItem {
         image: Vec<u8>,
         label: u8,
         row: u32,
     }
+
     impl DatasetItem for MnistItem {}
+
     impl fmt::Debug for MnistItem {
         fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
             let label_str: String = format!("label: {}\n", self.label);
@@ -87,10 +86,12 @@ pub mod builtin {
                 } else {
                     image_str.push_str("*");
                 }
+
                 if (i + 1) as u32 % self.row == 0 {
                     image_str.push_str("\n");
                 }
             }
+
             write!(f, "{}{}", label_str, image_str)
         }
     }
@@ -98,26 +99,31 @@ pub mod builtin {
     /// MNIST dataset
     ///
     /// # Parameters
-    /// * `root` - Root directory of dataset
+    /// * `test` - true, The testing dataset is loaded, false: The training dataset is loaded
+    /// * `train_img` - The on memory data of train images.
+    /// * `train_label` - The on memory data of train labels.
+    /// * `test_img` - The on memory data of test images.
+    /// * `test_label` - The on memory data of test labels.
     pub struct MNIST {
-        test: bool,
+        is_test: bool,
         train_img: Option<OnMemData>,
         train_label: Option<OnMemData>,
         test_img: Option<OnMemData>,
         test_label: Option<OnMemData>,
     }
+
     impl MNIST {
         /// Constructor of MNIST dataset
         ///
         /// # Arguments
-        /// * `root` - Root directory of dataset
-        /// * `train` - If True, downloads training set, otherwise downloads test set
-        fn new(root: PathBuf, test: bool) -> Result<MNIST, Box<dyn error::Error>> {
+        /// * `root` - The root directory of dataset
+        /// * `is_test` - true: downloads test set, false: downloads train set
+        fn new(root: PathBuf, is_test: bool) -> Result<MNIST, Box<dyn error::Error>> {
             // validate root
             // create one if one does not exist
             if let Ok(_) = fs::create_dir_all(root.as_path()) {}
 
-            if test {
+            if is_test {
                 let test_img = Some(OnMemData::new(
                     root.clone(),
                     "mnist_test_img",
@@ -128,8 +134,9 @@ pub mod builtin {
                     "mnist_test_label",
                     "http://yann.lecun.com/exdb/mnist/t10k-labels-idx1-ubyte.gz",
                 )?);
+
                 Ok(MNIST {
-                    test,
+                    is_test: is_test,
                     train_img: None,
                     train_label: None,
                     test_img,
@@ -146,8 +153,9 @@ pub mod builtin {
                     "mnist_train_label",
                     "http://yann.lecun.com/exdb/mnist/train-labels-idx1-ubyte.gz",
                 )?);
+
                 Ok(MNIST {
-                    test,
+                    is_test: is_test,
                     train_img,
                     train_label,
                     test_img: None,
@@ -156,40 +164,42 @@ pub mod builtin {
             }
         }
 
-        /// Returns dimension of each image.
-        /// Returns [N_ROW, N_COL] vector
+        /// Returns a vector that contains number of rows and columns for each image
         fn get_dim(&self) -> Vec<u32> {
             let mut image_data: Option<&OnMemData> = None;
 
-            if self.test {
-                if let Some(image_) = &self.test_img {
-                    image_data = Some(image_);
+            if self.is_test {
+                if let Some(image) = &self.test_img {
+                    image_data = Some(image);
                 }
             } else {
-                if let Some(image_) = &self.train_img {
-                    image_data = Some(image_);
+                if let Some(image) = &self.train_img {
+                    image_data = Some(image);
                 }
             }
 
             let mut n_rows: u32 = 0;
             let mut n_cols: u32 = 0;
-            if let Some(image_) = image_data {
-                n_rows = convert_byte_arr_to_u32(&image_.raw, 8, true);
-                n_cols = convert_byte_arr_to_u32(&image_.raw, 12, true);
+            if let Some(image) = image_data {
+                n_rows = convert_byte_arr_to_u32(&image.raw, 8, true);
+                n_cols = convert_byte_arr_to_u32(&image.raw, 12, true);
             }
+
             vec![n_rows, n_cols]
         }
     }
+
     impl Dataset<MnistItem> for MNIST {
         fn len(&self) -> u32 {
             let mut label: Option<&OnMemData> = None;
-            if self.test {
-                if let Some(label_) = &self.test_label {
-                    label = Some(label_);
+
+            if self.is_test {
+                if let Some(test_label) = &self.test_label {
+                    label = Some(test_label);
                 }
             } else {
-                if let Some(label_) = &self.train_label {
-                    label = Some(label_);
+                if let Some(train_label) = &self.train_label {
+                    label = Some(train_label);
                 }
             }
 
@@ -202,6 +212,11 @@ pub mod builtin {
             }
         }
 
+        /// Returns the datum corresponding to the index
+        ///
+        /// # Arguments
+        /// * `self` - A reference to itself
+        /// * `idx` - An index that corresponds to a datum
         fn get_item(&self, idx: u32) -> Result<MnistItem, Box<dyn error::Error>> {
             if self.len() <= idx {
                 panic!("Index out of bound");
@@ -210,19 +225,19 @@ pub mod builtin {
             let mut label_data: Option<&OnMemData> = None;
             let mut image_data: Option<&OnMemData> = None;
 
-            if self.test {
-                if let Some(label_) = &self.test_label {
-                    label_data = Some(label_);
+            if self.is_test {
+                if let Some(label) = &self.test_label {
+                    label_data = Some(label);
                 }
-                if let Some(image_) = &self.test_img {
-                    image_data = Some(image_);
+                if let Some(image) = &self.test_img {
+                    image_data = Some(image);
                 }
             } else {
-                if let Some(label_) = &self.train_label {
-                    label_data = Some(label_);
+                if let Some(label) = &self.train_label {
+                    label_data = Some(label);
                 }
-                if let Some(image_) = &self.train_img {
-                    image_data = Some(image_);
+                if let Some(image) = &self.train_img {
+                    image_data = Some(image);
                 }
             }
 
@@ -231,32 +246,34 @@ pub mod builtin {
             let n_cols: u32 = dim[1];
 
             // build images vector
-            let mut image = Vec::new();
-            if let Some(image_) = image_data {
+            let mut image_vec = Vec::new();
+
+            if let Some(image) = image_data {
                 let size = n_rows * n_cols;
                 let start_idx = 16 + size * idx;
+
                 for idx in start_idx..start_idx + size {
-                    image.push(image_.raw[idx as usize]);
+                    image_vec.push(image.raw[idx as usize]);
                 }
             }
 
             // get label
-            let mut label = 0;
-            if let Some(label_) = label_data {
-                label = label_.raw[(8 + idx) as usize];
+            let mut item_label = 0;
+            if let Some(label) = label_data {
+                item_label = label.raw[(8 + idx) as usize];
             }
 
             // build item
             let item = MnistItem {
-                image,
-                label,
+                image: image_vec,
+                label: item_label,
                 row: n_rows,
             };
+
             Ok(item)
         }
     }
 
-    /// Test code for builtin datasets
     #[cfg(test)]
     mod tests {
         use super::MNIST;
@@ -268,6 +285,7 @@ pub mod builtin {
             if let Ok(mnist_test) = MNIST::new(PathBuf::from("raw"), true) {
                 let dataset_length = mnist_test.len();
                 assert_eq!(dataset_length, 10000);
+
                 if let Ok(dataset_item) = mnist_test.get_item(0) {
                     println!("{:?}", dataset_item);
                 }

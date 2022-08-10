@@ -51,6 +51,7 @@ pub fn download_from_url(
 /// * `is_big_endian` : A flag that indicates if the data is stored as big endian
 fn convert_byte_arr_to_u32(byte_arr: &Vec<u8>, offset: u32, is_big_endian: bool) -> u32 {
     let mut val: u32 = 0;
+
     for i in 0..4 {
         let tmp = byte_arr[(offset + i) as usize];
         if is_big_endian {
@@ -59,5 +60,6 @@ fn convert_byte_arr_to_u32(byte_arr: &Vec<u8>, offset: u32, is_big_endian: bool)
             val += (tmp as u32) << (8 * i);
         }
     }
+
     val
 }
