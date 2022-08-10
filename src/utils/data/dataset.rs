@@ -25,7 +25,7 @@ pub trait Dataset<T: DatasetItem> {
 pub mod builtin {
     use super::Dataset;
     use crate::utils::data::dataset::DatasetItem;
-    use crate::utils::data::{byte_arr_to_u32, download_from_url};
+    use crate::utils::data::{convert_byte_arr_to_u32, download_from_url};
     use std::path::PathBuf;
     use std::{error, fmt, fs};
 
@@ -115,7 +115,7 @@ pub mod builtin {
         fn new(root: PathBuf, test: bool) -> Result<MNIST, Box<dyn error::Error>> {
             // validate root
             // create one if one does not exist
-            if let Ok(_) = std::fs::create_dir_all(root.as_path()) {}
+            if let Ok(_) = fs::create_dir_all(root.as_path()) {}
 
             if test {
                 let test_img = Some(OnMemData::new(
@@ -174,8 +174,8 @@ pub mod builtin {
             let mut n_rows: u32 = 0;
             let mut n_cols: u32 = 0;
             if let Some(image_) = image_data {
-                n_rows = byte_arr_to_u32(&image_.raw, 8, true);
-                n_cols = byte_arr_to_u32(&image_.raw, 12, true);
+                n_rows = convert_byte_arr_to_u32(&image_.raw, 8, true);
+                n_cols = convert_byte_arr_to_u32(&image_.raw, 12, true);
             }
             vec![n_rows, n_cols]
         }
@@ -196,7 +196,7 @@ pub mod builtin {
             // big endian
             // extract number of labels
             if let Some(label_data) = label {
-                byte_arr_to_u32(&label_data.raw, 4, true)
+                convert_byte_arr_to_u32(&label_data.raw, 4, true)
             } else {
                 0
             }

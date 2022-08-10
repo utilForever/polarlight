@@ -46,14 +46,14 @@ pub fn download_from_url(
 /// Convert byte array to u32
 ///
 /// # Arguments
-/// * `byt` : byte array
-/// * `offset` : offset of byte array to convert
-/// * `big_endian` : Boolean for if data is stored as big_endian
-fn byte_arr_to_u32(byt: &Vec<u8>, offset: u32, big_endian: bool) -> u32 {
+/// * `byte_arr` : The original byte array
+/// * `offset` : The offset of the byte array to convert
+/// * `is_big_endian` : A flag that indicates if the data is stored as big endian
+fn convert_byte_arr_to_u32(byte_arr: &Vec<u8>, offset: u32, is_big_endian: bool) -> u32 {
     let mut val: u32 = 0;
     for i in 0..4 {
-        let tmp = byt[(offset + i) as usize];
-        if big_endian {
+        let tmp = byte_arr[(offset + i) as usize];
+        if is_big_endian {
             val += (tmp as u32) << (24 - 8 * i);
         } else {
             val += (tmp as u32) << (8 * i);
