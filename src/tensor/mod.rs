@@ -148,7 +148,7 @@ impl<T: traits::TensorTrait<T>> Tensor<T> {
         Tensor::build(new_shape, vec)
     }
 
-    fn matmul3d(&self, other: &Tensor<T>) -> Tensor<T>
+    fn generalized_matmul(&self, other: &Tensor<T>) -> Tensor<T>
     where
         T: std::ops::Mul<Output = T>,
         T: std::ops::Add<Output = T>,
