@@ -4,6 +4,7 @@ use std::io::{Cursor, Read};
 use std::path::PathBuf;
 
 pub mod dataset;
+pub mod dataloader;
 
 /// Downloads file from url to designated root path.
 /// Download process will be proceeded when the file path does not exist.

@@ -118,7 +118,7 @@ pub mod builtin {
         /// # Arguments
         /// * `root` - The root directory of dataset
         /// * `is_test` - true: downloads test set, false: downloads train set
-        fn new(root: PathBuf, is_test: bool) -> Result<MNIST, Box<dyn error::Error>> {
+        pub fn new(root: PathBuf, is_test: bool) -> Result<MNIST, Box<dyn error::Error>> {
             // validate root
             // create one if one does not exist
             if let Ok(_) = fs::create_dir_all(root.as_path()) {}
