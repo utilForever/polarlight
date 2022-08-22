@@ -1,12 +1,7 @@
 extern crate core;
 
-pub mod utils;
+pub mod tensor;
 
-#[cfg(test)]
-mod tests {
-    #[test]
-    #[allow(clippy::eq_op)]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
-    }
-}
+pub use tensor::Tensor;
+
+pub mod utils;
