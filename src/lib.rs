@@ -1,6 +1,5 @@
 extern crate core;
 
-pub mod polarlight;
+pub mod nn;
 
-use polarlight::tensor::Tensor;
-use polarlight::nn::Linear;
+pub mod tensor;
