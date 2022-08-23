@@ -176,6 +176,73 @@ impl<T: traits::TensorTrait<T>> Tensor<T> {
         // e.g. [1, 2, 3, 4] -> [1, -1]
     }
 
+    pub fn unsqueeze(input: Tensor<T>, dim: usize) -> Tensor<T> {
+        let mut shape = input.shape.clone();
+        shape.insert(dim, 1);
+
+        Tensor::build(shape, input.components.clone())
+    }
+
+    pub fn cat(tensors: Vec<&Tensor<T>>, dim: usize) -> Tensor<T> {
+        let mut new_shape = tensors[0].shape.clone();
+        new_shape[dim] = tensors.len() as i32;
+
+        let origin_shape_pi = Tensor::<T>::get_shape_pi(&tensors[0].shape);
+        let new_shape_pi = Tensor::<T>::get_shape_pi(&new_shape);
+
+        let mut components: Vec<T> = vec![];
+
+        for tensor in &tensors {
+            for idx in 0..new_shape.len() {
+                if idx != dim && new_shape[idx] != tensor.shape[idx] {
+                    panic!("The tensors' shape should be the same except for the concatenation dimension");
+                }
+            }
+        }
+
+        // TODO build components
+        let mut new_size = 1;
+        for s in &new_shape {
+            new_size *= s;
+        }
+
+        for mut new_idx in 0..new_size {
+            let mut origin_idx: usize = 0;
+            let mut tensor_idx: usize = 0;
+
+            for (shape_idx, pi) in new_shape_pi.iter().enumerate() {
+                let val = new_idx / pi;
+
+                if shape_idx == dim {
+                    tensor_idx = val as usize;
+                } else {
+                    origin_idx = origin_idx + (val * origin_shape_pi[shape_idx]) as usize;
+                }
+
+                new_idx = new_idx - val * pi;
+            }
+
+            let origin_component= tensors[tensor_idx].components[origin_idx].clone();
+            components.push(origin_component);
+        }
+
+        Tensor::build(new_shape, components)
+    }
+
+    // utility methods
+
+    fn get_shape_pi(shape: &Vec<i32>) -> Vec<i32> {
+        let mut shape_pi: Vec<i32> = vec![1];
+
+        for idx in (0..shape.len()-1).rev() {
+            let pi = shape[idx+1] * shape_pi[0];
+
+            shape_pi.insert(0, pi);
+        }
+
+        shape_pi
+    }
+
     pub fn print(&self) {
         println!("shape {:?}", self.shape);
         self.print_helper();
