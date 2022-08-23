@@ -50,4 +50,12 @@ fn test_tensor() {
 
     let tmp_reshape = t.reshape(vec![12]);
     tmp_reshape.print();
+
+    let tmp1_unsqueezed = Tensor::unsqueeze(tmp1, 2);
+    tmp1_unsqueezed.print();
+    let tmp2_unsqueezed = Tensor::unsqueeze(tmp2, 2);
+    tmp2_unsqueezed.print();
+
+    let tmp_concat = Tensor::cat(vec![&tmp1_unsqueezed, &tmp2_unsqueezed], 2);
+    tmp_concat.print();
 }
