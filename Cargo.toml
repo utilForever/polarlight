@@ -15,3 +15,5 @@ license = "MIT"
 
 [dependencies]
 num = '*'
+reqwest = { version = "*", features = ["blocking"] }
+flate2 = { version = "*" }
