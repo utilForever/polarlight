@@ -219,19 +219,13 @@ impl<T: traits::TensorTrait<T>> Tensor<T> {
 
         let mut components: Vec<T> = vec![];
 
-        for tensor in &tensors {
-            for (idx, _) in new_shape.iter().enumerate() {
-                if idx != dim && new_shape[idx] != tensor.shape[idx] {
-                    panic!("The tensors' shape should be the same except for the concatenation dimension");
-                }
+        tensors.iter().zip(new_shape.iter().enumerate()).for_each(|(tensor, (idx, _))| {
+            if idx != dim && new_shape[idx] != tensor.shape[idx] {
+                panic!("The tensors' shape should be the same except for the concatenation dimension");
             }
-        }
+        });
 
-        // TODO build components
-        let mut new_size = 1;
-        for s in &new_shape {
-            new_size *= s;
-        }
+        let new_size = new_shape.iter().fold(1, |acc, x| acc * x);
 
         for mut new_idx in 0..new_size {
             let mut origin_idx: usize = 0;
