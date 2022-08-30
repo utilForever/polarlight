@@ -1,7 +1,7 @@
 use flate2::read::GzDecoder;
 use std::error;
 use std::io::{Cursor, Read};
-use std::path::PathBuf;
+use std::path::{PathBuf};
 
 pub mod dataset;
 
@@ -19,7 +19,7 @@ pub fn download_from_url(
     url: &str,
     is_decompress: bool,
 ) -> Result<(), Box<dyn error::Error>> {
-    let mut file_path = root.clone();
+    let mut file_path = root.to_path_buf();
     file_path.push(file_name);
 
     if !file_path.exists() {
@@ -49,7 +49,7 @@ pub fn download_from_url(
 /// * `byte_arr` : The original byte array
 /// * `offset` : The offset of the byte array to convert
 /// * `is_big_endian` : A flag that indicates if the data is stored as big endian
-fn convert_byte_arr_to_u32(byte_arr: &Vec<u8>, offset: u32, is_big_endian: bool) -> u32 {
+fn convert_byte_arr_to_u32(byte_arr: &[u8], offset: u32, is_big_endian: bool) -> u32 {
     let mut val: u32 = 0;
 
     for i in 0..4 {

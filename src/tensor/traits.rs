@@ -1,4 +1,3 @@
-use num::pow::Pow;
 use std::fmt::Debug;
 use std::fmt::Display;
 use std::ops::{Add, AddAssign, Mul};
