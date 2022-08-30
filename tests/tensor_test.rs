@@ -51,6 +51,13 @@ fn test_tensor() {
     let tmp_reshape = t.reshape(vec![12]);
     tmp_reshape.print();
 
+    let tmp_reshape_auto = t.reshape(vec![2, -1]);
+    tmp_reshape_auto.print();
+
+    // ========= panic!("only one dimension can be inferred"); case ==========
+    // let tmp_reshape_auto_2 = t.reshape(vec![-1, -1, 2]);
+    // tmp_reshape_auto_2.print();
+
     let tmp1_unsqueezed = Tensor::unsqueeze(tmp1, 2);
     tmp1_unsqueezed.print();
     let tmp2_unsqueezed = Tensor::unsqueeze(tmp2, 2);
