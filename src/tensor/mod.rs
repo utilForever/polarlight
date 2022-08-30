@@ -170,10 +170,37 @@ impl<T: traits::TensorTrait<T>> Tensor<T> {
     }
 
     pub fn reshape(&self, shape: Vec<i32>) -> Tensor<T> {
-        Tensor::build(shape, self.components.clone())
+        let cnt_auto = shape.iter().filter(|&n| *n == -1).count();
+        if cnt_auto == 1 {
+            let mut full_shape = 1;
+            let mut auto_shape = 1;
+            for i in &self.shape {
+                full_shape *= i;
+            }
+            for i in &shape {
+                if *i != -1 {
+                    auto_shape *= i;
+                }
+            }
 
-        // TODO : reshape when one dimension is -1
-        // e.g. [1, 2, 3, 4] -> [1, -1]
+            if full_shape % auto_shape != 0 {
+                panic!("The shape is not valid");
+            } else {
+                let mut new_shape = Vec::new();
+                for i in &shape {
+                    if *i == -1 {
+                        new_shape.push(full_shape / auto_shape);
+                    } else {
+                        new_shape.push(*i);
+                    }
+                }
+                Tensor::build(new_shape, self.components.clone())
+            }
+        } else if cnt_auto > 1 {
+            panic!("only one dimension can be inferred");
+        } else {
+            Tensor::build(shape, self.components.clone())
+        }
     }
 
     pub fn unsqueeze(input: Tensor<T>, dim: usize) -> Tensor<T> {
