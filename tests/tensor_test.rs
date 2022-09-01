@@ -57,4 +57,12 @@ fn test_tensor() {
     // ========= panic!("only one dimension can be inferred"); case ==========
     // let tmp_reshape_auto_2 = t.reshape(vec![-1, -1, 2]);
     // tmp_reshape_auto_2.print();
+
+    let tmp1_unsqueezed = Tensor::unsqueeze(tmp1, 2);
+    tmp1_unsqueezed.print();
+    let tmp2_unsqueezed = Tensor::unsqueeze(tmp2, 2);
+    tmp2_unsqueezed.print();
+
+    let tmp_concat = Tensor::cat(vec![&tmp1_unsqueezed, &tmp2_unsqueezed], 2);
+    tmp_concat.print();
 }

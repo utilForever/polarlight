@@ -78,17 +78,17 @@ pub mod builtin {
     impl fmt::Debug for MnistItem {
         fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
             let label_str: String = format!("label: {}\n", self.label);
-            let mut image_str: String = format!("image:\n");
+            let mut image_str: String = "image:\n".to_string();
 
             for (i, pixel) in self.image.iter().enumerate() {
                 if *pixel == 0 {
-                    image_str.push_str(" ");
+                    image_str.push(' ');
                 } else {
-                    image_str.push_str("*");
+                    image_str.push('*');
                 }
 
                 if (i + 1) as u32 % self.row == 0 {
-                    image_str.push_str("\n");
+                    image_str.push('\n');
                 }
             }
 
@@ -121,7 +121,7 @@ pub mod builtin {
         fn new(root: PathBuf, is_test: bool) -> Result<MNIST, Box<dyn error::Error>> {
             // validate root
             // create one if one does not exist
-            if let Ok(_) = fs::create_dir_all(root.as_path()) {}
+            let _ = fs::create_dir_all(root.as_path()).is_ok();
 
             if is_test {
                 let test_img = Some(OnMemData::new(
@@ -130,13 +130,13 @@ pub mod builtin {
                     "http://yann.lecun.com/exdb/mnist/t10k-images-idx3-ubyte.gz",
                 )?);
                 let test_label = Some(OnMemData::new(
-                    root.clone(),
+                    root,
                     "mnist_test_label",
                     "http://yann.lecun.com/exdb/mnist/t10k-labels-idx1-ubyte.gz",
                 )?);
 
                 Ok(MNIST {
-                    is_test: is_test,
+                    is_test,
                     train_img: None,
                     train_label: None,
                     test_img,
@@ -149,13 +149,13 @@ pub mod builtin {
                     "http://yann.lecun.com/exdb/mnist/train-images-idx3-ubyte.gz",
                 )?);
                 let train_label = Some(OnMemData::new(
-                    root.clone(),
+                    root,
                     "mnist_train_label",
                     "http://yann.lecun.com/exdb/mnist/train-labels-idx1-ubyte.gz",
                 )?);
 
                 Ok(MNIST {
-                    is_test: is_test,
+                    is_test,
                     train_img,
                     train_label,
                     test_img: None,
@@ -172,10 +172,8 @@ pub mod builtin {
                 if let Some(image) = &self.test_img {
                     image_data = Some(image);
                 }
-            } else {
-                if let Some(image) = &self.train_img {
-                    image_data = Some(image);
-                }
+            } else if let Some(image) = &self.train_img {
+                image_data = Some(image);
             }
 
             let mut n_rows: u32 = 0;
@@ -197,10 +195,8 @@ pub mod builtin {
                 if let Some(test_label) = &self.test_label {
                     label = Some(test_label);
                 }
-            } else {
-                if let Some(train_label) = &self.train_label {
-                    label = Some(train_label);
-                }
+            } else if let Some(train_label) = &self.train_label {
+                label = Some(train_label);
             }
 
             // big endian

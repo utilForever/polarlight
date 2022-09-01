@@ -20,8 +20,8 @@ impl<T: traits::TensorTrait<T>> Tensor<T> {
         }
 
         Tensor {
-            shape: shape,
-            components: components,
+            shape,
+            components,
         }
     }
     pub fn get(&self, index: Vec<i32>) -> T {
@@ -36,7 +36,7 @@ impl<T: traits::TensorTrait<T>> Tensor<T> {
             i += tmp * index[x as usize];
         }
 
-        return self.components[i as usize].clone();
+        self.components[i as usize].clone()
     }
 
     pub fn dim(&self) -> i32 {
@@ -52,8 +52,8 @@ impl<T: traits::TensorTrait<T>> Tensor<T> {
         }
         let mut vec = Vec::new();
         for i in 0..self.components.len() {
-            let mut tmp1 = self.components[i as usize].clone();
-            let mut tmp2 = other.components[i as usize].clone();
+            let tmp1 = self.components[i as usize].clone();
+            let tmp2 = other.components[i as usize].clone();
             vec.push(tmp1 + tmp2);
         }
         Tensor::build(self.shape.clone(), vec)
@@ -68,8 +68,8 @@ impl<T: traits::TensorTrait<T>> Tensor<T> {
         }
         let mut vec = Vec::new();
         for i in 0..self.components.len() {
-            let mut tmp1 = self.components[i as usize].clone();
-            let mut tmp2 = other.components[i as usize].clone();
+            let tmp1 = self.components[i as usize].clone();
+            let tmp2 = other.components[i as usize].clone();
             vec.push(tmp1 - tmp2);
         }
         Tensor::build(self.shape.clone(), vec)
@@ -84,8 +84,8 @@ impl<T: traits::TensorTrait<T>> Tensor<T> {
         }
         let mut vec = Vec::new();
         for i in 0..self.components.len() {
-            let mut tmp1 = self.components[i as usize].clone();
-            let mut tmp2 = other.components[i as usize].clone();
+            let tmp1 = self.components[i as usize].clone();
+            let tmp2 = other.components[i as usize].clone();
             vec.push(tmp1 / tmp2);
         }
         Tensor::build(self.shape.clone(), vec)
@@ -140,7 +140,7 @@ impl<T: traits::TensorTrait<T>> Tensor<T> {
             for i in 0..other.shape[1] {
                 let mut tmp: T = T::zero();
                 for j in 0..self.shape[1] {
-                    tmp = tmp + self.get(vec![k, j]) * other.get(vec![j, i]);
+                    tmp += self.get(vec![k, j]) * other.get(vec![j, i]);
                 }
                 vec.push(tmp);
             }
@@ -201,6 +201,67 @@ impl<T: traits::TensorTrait<T>> Tensor<T> {
         } else {
             Tensor::build(shape, self.components.clone())
         }
+    }
+
+    pub fn unsqueeze(input: Tensor<T>, dim: usize) -> Tensor<T> {
+        let mut shape = input.shape.clone();
+        shape.insert(dim, 1);
+
+        Tensor::build(shape, input.components)
+    }
+
+    pub fn cat(tensors: Vec<&Tensor<T>>, dim: usize) -> Tensor<T> {
+        let mut new_shape = tensors[0].shape.clone();
+        new_shape[dim] = tensors.len() as i32;
+
+        let origin_shape_pi = Tensor::<T>::get_shape_pi(&tensors[0].shape);
+        let new_shape_pi = Tensor::<T>::get_shape_pi(&new_shape);
+
+        let mut components: Vec<T> = vec![];
+
+        tensors.iter().zip(new_shape.iter().enumerate()).for_each(|(tensor, (idx, _))| {
+            if idx != dim && new_shape[idx] != tensor.shape[idx] {
+                panic!("The tensors' shape should be the same except for the concatenation dimension");
+            }
+        });
+
+        let new_size = new_shape.iter().fold(1, |acc, x| acc * x);
+
+        for mut new_idx in 0..new_size {
+            let mut origin_idx: usize = 0;
+            let mut tensor_idx: usize = 0;
+
+            for (shape_idx, pi) in new_shape_pi.iter().enumerate() {
+                let val = new_idx / pi;
+
+                if shape_idx == dim {
+                    tensor_idx = val as usize;
+                } else {
+                    origin_idx += (val * origin_shape_pi[shape_idx]) as usize;
+                }
+
+                new_idx -= val * pi;
+            }
+
+            let origin_component = tensors[tensor_idx].components[origin_idx].clone();
+            components.push(origin_component);
+        }
+
+        Tensor::build(new_shape, components)
+    }
+
+    // utility methods
+
+    fn get_shape_pi(shape: &Vec<i32>) -> Vec<i32> {
+        let mut shape_pi: Vec<i32> = vec![1];
+
+        for idx in (0..shape.len() - 1).rev() {
+            let pi = shape[idx + 1] * shape_pi[0];
+
+            shape_pi.insert(0, pi);
+        }
+
+        shape_pi
     }
 
     pub fn print(&self) {
