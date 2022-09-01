@@ -1,6 +1,9 @@
 extern crate core;
 
+pub mod tensor;
 pub mod utils;
+
+pub use tensor::Tensor;
 
 #[cfg(test)]
 mod tests {
