@@ -19,10 +19,7 @@ impl<T: traits::TensorTrait<T>> Tensor<T> {
             panic!("The length of components is not equal to the length of shape");
         }
 
-        Tensor {
-            shape,
-            components,
-        }
+        Tensor { shape, components }
     }
     pub fn get(&self, index: Vec<i32>) -> T {
         //let mut index = index;

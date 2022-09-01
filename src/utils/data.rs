@@ -1,7 +1,7 @@
 use flate2::read::GzDecoder;
 use std::error;
 use std::io::{Cursor, Read};
-use std::path::{PathBuf};
+use std::path::PathBuf;
 
 pub mod dataset;
 
